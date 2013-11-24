@@ -8,7 +8,7 @@
 
 3、修改Tab为4个空格，因为不同的编辑器看tab长度不一样，好丑
 
-4、类命名同一“C”开头， 如：class CHttpClient(object):{ pass }
+4、类命名统一“C”开头， 如：class CHttpClient(object):{ pass }
 
 5、函数名大写开头，如：CreateDatabase()， 命名可以适当长点，必须见名之意；
 类函数统一“m_”开头， 如：m_CreateDatabase()
