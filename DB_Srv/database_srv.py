@@ -1,6 +1,8 @@
 #coding: utf-8
 #footprint database server
 
+import os
+import hashlib
 import pymongo
 import tornado.web
 import tornado.httpserver
@@ -17,12 +19,14 @@ class Application(tornado.web.Application):
 			(r"/", HomeHandler),
 			(r"/register", RegisterHandler),
 			(r"/login", LoginHandler),
+			(r"/logout", LogoutHandler),
 			
 			(r"/userreg", UserRegHandler),
 			(r"/userlogin", UserLoginHandler),
-			
 		]
 		settings = dict(
+			title="footprint",
+			template_path=os.path.join(os.path.dirname(__file__), "templates"),
 			cookie_secret="__TODO:_GENERATE_YOUR_OWN_RANDOM_VALUE_HERE__",
 			debug=True,
 		)
@@ -38,16 +42,17 @@ class BaseHandler(tornado.web.RequestHandler):
 	def get_current_user(self):
 		username = self.get_secure_cookie("username")
 		if not username: return None
-		return self.db[options.mongodb_authors].find_one({"username": username})
+		return self.db[options.users_collection].find_one({"username": username})
 
 class HomeHandler(BaseHandler):
 	def get(self):
-		html = """<html><body>
-				<li><a href="/login">login</a></li>
-				<li><a href="/register">register</a></li>
-				</body><html>
-				"""
-		self.write(html)
+		self.render("home.html")
+# 		html = """<html><body>
+# 				<li><a href="/login">login</a></li>
+# 				<li><a href="/register">register</a></li>
+# 				</body><html>
+# 				"""
+# 		self.write(html)
 		
 class RegisterHandler(BaseHandler):
 	def get(self):
@@ -78,6 +83,8 @@ class UserRegHandler(BaseHandler):
 		if coll.find_one({"username": username}):
 			self.write("该用户名已经被注册，重新选择一个吧")
 			return
+		
+		pwd = hashlib.new("md5", pwd).hexdigest()
 		coll.insert({"username":username, "pwd":pwd})
 		self.write("恭喜注册成功！")
 
@@ -103,12 +110,20 @@ class UserLoginHandler(BaseHandler):
 		if not username or not pwd:
 			self.write("用户名和密码均不能为空")
 			return
+		
+		pwd = hashlib.new("md5", pwd).hexdigest()
 		coll = self.db[options.users_collection]
 		user = coll.find_one({"username": username, "pwd":pwd})
 		if user:
 			self.write("登陆成功！")
+			self.set_secure_cookie("username", username)
 		else:
 			self.write("账号密码不匹配哦~~再试一下")
+
+class LogoutHandler(BaseHandler):
+	def get(self):
+		self.clear_cookie("username")
+		self.redirect(self.get_argument("next", "/"))
 		
 def main():
 	print("footprint database srv started ...")
