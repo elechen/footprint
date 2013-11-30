@@ -28,6 +28,6 @@ Python实现的！！一切都是刚刚好！
 
 详细安装过程google一下你就知道
 
-下面是我总结的一篇文章，看不懂
+下面是我总结的一篇文章，可以看一下
 《MONGODB+PYTHON的安装配置简单教程》
 http://elechen512.diandian.com/post/2013-10-23/40055596936
