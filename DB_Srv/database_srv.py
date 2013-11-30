@@ -122,7 +122,7 @@ class DataHandler(BaseHandler):
 	
 		data = eval(data)
 		if not isinstance(data, list):
-			self.write("输入数据应该像这样:[1, username, pwd] -- 数据类型不是列表")
+			self.write("输入数据应该像这样:[1, username, pwd] -- 数据类型应该为列表")
 			return
 		iKey = data[0]
 		if iKey == C2DS_USERREGISTER:
@@ -139,7 +139,7 @@ class DataHandler(BaseHandler):
 			self.Login(username, pwd)
 		
 		else:
-			self.write("操作类型:%d尚未支持" % iKey)
+			self.write("操作类型:%d。数据服务器尚未支持" % iKey)
 			
 class LogoutHandler(BaseHandler):
 	def get(self):
