@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block body %}
+ <form action="/datahandle" method="post">
+                        要处理的数据：<input type="text" name="data">
+                       <input type="submit" value="Submit" />
+</form>
+
+   <p>说明一下：这个接口其实就是专门给app使用的
+   <li><h3>使用举例：</li>
+   
+   <li>
+       <h3>1、注册流程：</li>
+       
+      <p>组装一个post，name是data；<br>
+       post到/datahandle这个网址即可，data内容是: [1, username, pwd]；
+       <br>客户端做好数据检测， 把正确地的数据传输过来就行，上面的数据包括中括号
+       
+   <li>
+       <h3>2、登陆流程：</li>
+       
+       <p>组装一个post，name是data；<br>
+       post到/datahandle这个网址即可，data内容是: [2, username, pwd]；
+       <br>客户端做好数据检测， 把正确的数据以字符串形式传输过来就行，上面的数据
+       <br>包括中括号
+   
+   <h3>【username、pwd的数据类型都是字符串。】</h3>
+   
+   <li>
+       <h3>返回结果</h3></li>
+       <p>都是一样类型的：todo怎么描述好呢？？？
+       
+   <li>
+       <h3>总结一下：</h3></li>
+       
+       <p>其实就是依靠data的第一个元素来区分客户端的请求
+       <br>服务器和客户端制定好协议，然后客户端直接通过这个接口就拿到了数据。
+       <br>如此就是大大降低了客户端服务端的耦合度，因为按照这个协议，无论客户端是什么
+       <br>类型，wp8或者ios或者浏览器都没关系，服务器是通用的了。到后面，服务器需要
+       <br>或者客户端要修改，那就直接套用这个接口，两边不相互收到限制了。到时服务器要
+       <br>转为MySQL什么的，客户端也是无需改动任何代码的啦。
+   
+{% end %}

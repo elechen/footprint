@@ -23,6 +23,8 @@ class Application(tornado.web.Application):
 			
 			(r"/userreg", UserRegHandler),
 			(r"/userlogin", UserLoginHandler),
+			(r"/datahandle", DataHandler),
+			
 		]
 		settings = dict(
 			title="footprint",
@@ -43,70 +45,8 @@ class BaseHandler(tornado.web.RequestHandler):
 		username = self.get_secure_cookie("username")
 		if not username: return None
 		return self.db[options.users_collection].find_one({"username": username})
-
-class HomeHandler(BaseHandler):
-	def get(self):
-		self.render("home.html")
-# 		html = """<html><body>
-# 				<li><a href="/login">login</a></li>
-# 				<li><a href="/register">register</a></li>
-# 				</body><html>
-# 				"""
-# 		self.write(html)
-		
-class RegisterHandler(BaseHandler):
-	def get(self):
-		html = """<html>
-					<body>
-						<form action="/userreg" method="post">
-						用户：<input type="text" name="username">
-						<br/>
-						密码：<input type="password" name="password">
-						<input type="submit" value="Submit" />
-						</form>
-						<p>
-							就这么简单，注册吧。
-						</p>
-					</body>
-				</html>
-			"""
-		self.write(html)
-
-class UserRegHandler(BaseHandler):
-	def post(self):
-		username = self.get_argument("username", "")
-		pwd = self.get_argument("password", "")
-		if not username or not pwd:
-			self.write("用户名和密码均不能为空")
-			return
-		coll = self.db[options.users_collection]
-		if coll.find_one({"username": username}):
-			self.write("该用户名已经被注册，重新选择一个吧")
-			return
-		
-		pwd = hashlib.new("md5", pwd).hexdigest()
-		coll.insert({"username":username, "pwd":pwd})
-		self.write("恭喜注册成功！")
-
-class LoginHandler(BaseHandler):
-	def get(self):
-		html = """<html>
-					<body>
-						<form action="/userlogin" method="post">
-						用户：<input type="text" name="username">
-						<br/>
-						密码：<input type="password" name="password">
-						<input type="submit" value="Submit" />
-						</form>
-					</body>
-				</html>
-			"""
-		self.write(html)
-
-class UserLoginHandler(BaseHandler):
-	def post(self):
-		username = self.get_argument("username", "")
-		pwd = self.get_argument("password", "")
+	
+	def Login(self, username, pwd):
 		if not username or not pwd:
 			self.write("用户名和密码均不能为空")
 			return
@@ -119,7 +59,88 @@ class UserLoginHandler(BaseHandler):
 			self.set_secure_cookie("username", username)
 		else:
 			self.write("账号密码不匹配哦~~再试一下")
+			
+	def Register(self, username, pwd):
+		coll = self.db[options.users_collection]
+		if coll.find_one({"username": username}):
+			self.write("该用户名已经被注册，重新选择一个吧")
+			return
+		
+		pwd = hashlib.new("md5", pwd).hexdigest()
+		coll.insert({"username":username, "pwd":pwd})
+		self.write("恭喜注册成功！")
 
+class HomeHandler(BaseHandler):
+	def get(self):
+		self.render("home.html")
+		
+class RegisterHandler(BaseHandler):
+	def get(self):
+		self.render("register.html")
+
+class UserRegHandler(BaseHandler):
+	def post(self):
+		username = self.get_argument("username", "")
+		pwd = self.get_argument("password", "")
+		pwd2 = self.get_argument("password2", "")
+		if not username or not pwd or not pwd2:
+			self.write("用户名和密码均不能为空")
+			return
+		
+		if pwd != pwd2:
+			self.write("两个密码不一样哦~")
+			return
+		
+		self.Register(username, pwd)
+
+class LoginHandler(BaseHandler):
+	def get(self):
+		self.render("login.html")
+
+class UserLoginHandler(BaseHandler):
+	def post(self):
+		username = self.get_argument("username", "")
+		pwd = self.get_argument("password", "")
+		self.Login(username, pwd)
+
+C2DS_USERREGISTER = 1
+C2DS_USERLOGIN = 2
+
+class DataHandler(BaseHandler):
+	def get(self):
+		if not self.get_current_user():
+			self.write("您尚未登录")
+			return
+		
+		self.render("datahandle.html")
+	
+	def post(self):
+		data = self.get_argument("data", "None")
+		if data == "None":
+			self.write("you do not post any thing")
+			return 
+	
+		data = eval(data)
+		if not isinstance(data, list):
+			self.write("输入数据应该像这样:[1, username, pwd] -- 数据类型不是列表")
+			return
+		iKey = data[0]
+		if iKey == C2DS_USERREGISTER:
+			if len(data) != 3:
+				self.write("输入数据应该像这样:[1, username, pwd] -- 注册数据长度不合法")
+			username = data[1]
+			pwd = data[2]
+			self.Register(username, pwd)
+		elif iKey == C2DS_USERLOGIN:
+			if len(data) != 3:
+				self.write("输入数据应该像这样:[1, username, pwd] -- 登录数据长度不合法")
+			username = data[1]
+			pwd = data[2]
+			self.Login(username, pwd)
+		
+		else:
+			self.write("操作类型:%d尚未支持" % iKey)
+			
 class LogoutHandler(BaseHandler):
 	def get(self):
 		self.clear_cookie("username")

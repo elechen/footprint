@@ -1,1 +1,12 @@
 {% extends "base.html" %}
+
+{% block body %}
+      {% if current_user %}
+      <p>你好!{{current_user["username"]}}</p>
+        <a href="/logout">{{ _("登出") }}</a><br/>
+        <a href="/datahandle">{{ _("数据处理") }}</a>
+      {% else %}
+        <a href="/login">{{ _("登陆") }}</a><br/>
+        <a href="/register">{{ _("注册") }}</a>
+      {% end %}
+{% end %}

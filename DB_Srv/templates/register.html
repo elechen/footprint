@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block body %}
+                <form action="/userreg" method="post">
+                        用户：<input type="text" name="username"><br/>
+                        密码：<input type="password" name="password"><br/>
+                        密码：<input type="password" name="password2">
+                <input type="submit" value="Submit" />
+           </form>
+{% end %}
