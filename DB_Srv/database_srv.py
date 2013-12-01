@@ -44,13 +44,14 @@ class BaseHandler(tornado.web.RequestHandler):
 	def get_current_user(self):
 		username = self.get_secure_cookie("username")
 		if not username: return None
-		return self.db[options.users_collection].find_one({"username": username})
-	
+		username = username.decode(encoding='UTF-8',errors='strict') #python3.3.3编码要求
+		return self.db[options.users_collection].find_one({"username": (username),})
+
 	def Login(self, username, pwd):
 		if not username or not pwd:
 			self.write("用户名和密码均不能为空")
 			return
-		
+		pwd = pwd.encode('utf-8') #为兼容python3.3.3版本的haslib模块
 		pwd = hashlib.new("md5", pwd).hexdigest()
 		coll = self.db[options.users_collection]
 		user = coll.find_one({"username": username, "pwd":pwd})
@@ -66,6 +67,7 @@ class BaseHandler(tornado.web.RequestHandler):
 			self.write("该用户名已经被注册，重新选择一个吧")
 			return
 		
+		pwd = pwd.encode('utf-8') #为兼容python3.3.3版本的haslib模块
 		pwd = hashlib.new("md5", pwd).hexdigest()
 		coll.insert({"username":username, "pwd":pwd})
 		self.write("恭喜注册成功！")

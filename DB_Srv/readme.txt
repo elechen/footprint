@@ -20,8 +20,7 @@ Python实现的！！一切都是刚刚好！
 ==================
 服务器运行环境：
 0、Windows7
-1、安装Python2.7或以上（但不支持Python3，因为这个版本新增的
-特性太多了，而且不兼容以前的）
+1、安装Python3.3.3(其他版本尚未测试)
 2、安装MongoDB
 3、Python库中添加pymongo模块
 4、Python库中添加tornado模块
